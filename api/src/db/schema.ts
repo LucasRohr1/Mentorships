@@ -1,7 +1,7 @@
 import { pgTable, uuid, varchar, pgEnum, integer, timestamp, decimal } from 'drizzle-orm/pg-core';
 import { createSelectSchema, createInsertSchema } from 'drizzle-zod';
 
-const userRoleEnum = pgEnum('user_role', ['mentor', 'student']);
+const userRoleEnum = pgEnum('user_role', ['mentor', 'student', 'admin']);
 const bookingStatusEnum = pgEnum('booking_status', ['pending', 'confirmed', 'cancelled']);
 
 export const users = pgTable('users', {
