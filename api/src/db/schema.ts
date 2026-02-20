@@ -26,7 +26,7 @@ export const profiles = pgTable('profiles', {
 
 export const categories = pgTable('categories', {
     id: uuid('category_id').primaryKey().defaultRandom(),
-    name: varchar('name', { length: 255 }).notNull(),
+    name: varchar('name', { length: 255 }).notNull().unique(),
 });
 
 export const mentorships = pgTable('mentorships', {
