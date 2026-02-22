@@ -5,6 +5,7 @@ import cors from 'cors'
 import { isHttpError } from 'http-errors'
 import { env } from './env.js'
 import { authRouter } from './modules/auth/auth.module.js'
+import { userRouter } from './modules/users/users.module.js'
 
 const app = express()
 
@@ -23,6 +24,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 app.use('/auth', authRouter)
+app.use('/users', userRouter)
 
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   if (isHttpError(err)) {

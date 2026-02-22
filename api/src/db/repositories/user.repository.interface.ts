@@ -8,8 +8,16 @@ export interface CreateUserInput {
   role: 'mentor' | 'student' | 'admin'
 }
 
+export interface UpdateUserInput {
+  name?: string
+  lastName?: string
+  email?: string
+  passwordHash?: string
+}
+
 export interface IUserRepository {
   findByEmail(email: string): Promise<User | null>
   findById(id: string): Promise<User | null>
   create(data: CreateUserInput): Promise<User>
+  update(id: string, data: UpdateUserInput): Promise<User>
 }

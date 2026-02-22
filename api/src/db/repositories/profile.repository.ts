@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm'
-import type { IProfileRepository, CreateProfileInput } from './profile.repository.interface.js'
+import type { IProfileRepository, CreateProfileInput, UpdateProfileInput } from './profile.repository.interface.js'
 import { db } from '../connection.js'
 import { profiles } from '../schema.js'
 
@@ -18,5 +18,15 @@ export class DrizzleProfileRepository implements IProfileRepository {
       .from(profiles)
       .where(eq(profiles.userId, userId))
     return profile ?? null
+  }
+
+  async update(userId: string, data: UpdateProfileInput) {
+    const [profile] = await this._db
+      .update(profiles)
+      .set(data)
+      .where(eq(profiles.userId, userId))
+      .returning()
+    if (!profile) throw new Error('Profile not found')
+    return profile
   }
 }

@@ -13,7 +13,7 @@ export const generateJWT = async (payload: JWTPayload) => {
     const secret = env.JWT_SECRET
     const secretKey = createSecretKey(secret, 'utf-8')
 
-    const token = await new SignJWT({payload})
+    const token = await new SignJWT({ ...payload })
         .setProtectedHeader({alg: 'HS256'})
         .setIssuedAt()
         .setExpirationTime(env.JWT_EXPIRES_IN)

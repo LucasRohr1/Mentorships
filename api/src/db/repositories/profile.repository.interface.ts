@@ -7,7 +7,14 @@ export interface CreateProfileInput {
   avatarUrl?: string
 }
 
+export interface UpdateProfileInput {
+  bio?: string
+  linkedinUrl?: string | null
+  avatarUrl?: string | null
+}
+
 export interface IProfileRepository {
   create(data: CreateProfileInput): Promise<Profile>
   findByUserId(userId: string): Promise<Profile | null>
+  update(userId: string, data: UpdateProfileInput): Promise<Profile>
 }

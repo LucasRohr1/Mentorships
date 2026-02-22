@@ -46,6 +46,8 @@ export class AuthService {
     return this.buildAuthResponse(user)
   }
 
+  // =============================== PRIVATE METHODS ===============================
+
   private async assertEmailAvailable(email: string): Promise<void> {
     const existing = await this.userRepo.findByEmail(email)
     if (existing) throw createError(400, 'Email already registered')
