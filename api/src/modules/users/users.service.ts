@@ -34,7 +34,8 @@ export class UserService {
   }
 
   async updateMe(userId: string, input: UpdateMeInput): Promise<UserWithProfile> {
-    const userData = this.extractUserData(input)
+    if (input.email !== undefined) await this.assertEmailAvailableForUpdate(input.email, userId)
+    const userData = await this.extractUserData(input)
     const profileData = this.extractProfileData(input)
 
     if (Object.keys(userData).length > 0) await this.userRepo.update(userId, userData)
@@ -43,12 +44,17 @@ export class UserService {
     return this.getMe(userId)
   }
 
-  private extractUserData(input: UpdateMeInput): { name?: string; lastName?: string; email?: string; passwordHash?: string } {
+  private async assertEmailAvailableForUpdate(email: string, userId: string): Promise<void> {
+    const existing = await this.userRepo.findByEmail(email)
+    if (existing && existing.id !== userId) throw createError(400, 'Email already registered')
+  }
+
+  private async extractUserData(input: UpdateMeInput): Promise<{ name?: string; lastName?: string; email?: string; passwordHash?: string }> {
     const data: { name?: string; lastName?: string; email?: string; passwordHash?: string } = {}
     if (input.name !== undefined) data.name = input.name
     if (input.lastName !== undefined) data.lastName = input.lastName
     if (input.email !== undefined) data.email = input.email
-    if (input.password) data.passwordHash = bcrypt.hashSync(input.password, env.BCRYPT_SALT_ROUNDS)
+    if (input.password) data.passwordHash = await bcrypt.hash(input.password, env.BCRYPT_SALT_ROUNDS)
     return data
   }
 
