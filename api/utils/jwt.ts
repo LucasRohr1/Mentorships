@@ -5,7 +5,8 @@ import {env} from '../src/env.js'
 export interface JWTPayload {
     id: string
     email: string
-    username: string
+    name: string
+    lastName: string
 }
 
 export const generateJWT = async (payload: JWTPayload) => {

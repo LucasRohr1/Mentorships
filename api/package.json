@@ -4,16 +4,19 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/app.ts",
+    "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/app.js",
+    "start": "node dist/src/index.js",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx src/db/seed.ts",
     "db:docker:up": "docker compose up -d db",
     "db:docker:down": "docker compose down",
-    "test": "vitest"
+    "test": "vitest",
+    "check": "curl -sf http://localhost:3000/health || (echo 'Servidor no responde. Ejecutá: npm run dev' && exit 1)",
+    "port:free": "npx --yes kill-port 3000",
+    "dev:fresh": "npm run port:free && npm run dev"
   },
   "keywords": [],
   "author": "",
