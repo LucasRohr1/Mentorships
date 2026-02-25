@@ -3,6 +3,7 @@ import createError from 'http-errors'
 import type { IUserRepository } from '../../db/repositories/user.repository.interface.js'
 import type { IProfileRepository } from '../../db/repositories/profile.repository.interface.js'
 import type { CreateUserInput } from '../../db/repositories/user.repository.interface.js'
+import type { IUnitOfWork } from '../../db/repositories/unit-of-work.interface.js'
 import { generateJWT } from '../../../utils/jwt.js'
 import { env } from '../../env.js'
 
@@ -32,7 +33,8 @@ export interface AuthResponse {
 export class AuthService {
   constructor(
     private readonly userRepo: IUserRepository,
-    private readonly profileRepo: IProfileRepository
+    private readonly profileRepo: IProfileRepository,
+    private readonly unitOfWork: IUnitOfWork
   ) {}
 
   async register(input: RegisterInput): Promise<AuthResponse> {
@@ -56,9 +58,12 @@ export class AuthService {
   private async createUserWithProfile(input: RegisterInput) {
     const { password, bio, ...userFields } = input
     const passwordHash = await bcrypt.hash(password, env.BCRYPT_SALT_ROUNDS)
-    const user = await this.userRepo.create({ ...userFields, passwordHash })
-    await this.profileRepo.create({ userId: user.id, bio })
-    return user
+
+    return this.unitOfWork.runInTransaction(async ({ users, profiles }) => {
+      const user = await users.create({ ...userFields, passwordHash })
+      await profiles.create({ userId: user.id, bio })
+      return user
+    })
   }
 
   private async resolveAuthenticatedUser(email: string, password: string) {

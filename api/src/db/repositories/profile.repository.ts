@@ -3,8 +3,12 @@ import type { IProfileRepository, CreateProfileInput, UpdateProfileInput } from 
 import { db } from '../connection.js'
 import { profiles } from '../schema.js'
 
+type DatabaseClient = typeof db
+type TransactionClient = Parameters<Parameters<DatabaseClient['transaction']>[0]>[0]
+type RepositoryClient = DatabaseClient | TransactionClient
+
 export class DrizzleProfileRepository implements IProfileRepository {
-  constructor(private readonly _db: typeof db = db) {}
+  constructor(private readonly _db: RepositoryClient = db) {}
 
   async create(data: CreateProfileInput) {
     const [profile] = await this._db.insert(profiles).values(data).returning()
