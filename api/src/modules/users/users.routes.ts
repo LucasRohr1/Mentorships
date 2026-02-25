@@ -9,10 +9,14 @@ const updateMeSchema = z.object({
   lastName: z.string().min(1).optional(),
   email: z.string().email().optional(),
   password: z.string().min(8).optional(),
+  currentPassword: z.string().min(8).optional(),
   bio: z.string().min(1).optional(),
   linkedinUrl: z.string().url().optional().or(z.literal('')),
   avatarUrl: z.string().url().optional().or(z.literal('')),
-})
+}).refine(
+  (data) => !data.password || !!data.currentPassword,
+  { message: 'currentPassword is required when changing password', path: ['currentPassword'] }
+)
 
 export type UserController = ReturnType<typeof createUserController>
 

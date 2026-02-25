@@ -1,4 +1,5 @@
 import { eq } from 'drizzle-orm'
+import createError from 'http-errors'
 import type { IProfileRepository, CreateProfileInput, UpdateProfileInput } from './profile.repository.interface.js'
 import { db } from '../connection.js'
 import { profiles } from '../schema.js'
@@ -12,7 +13,7 @@ export class DrizzleProfileRepository implements IProfileRepository {
 
   async create(data: CreateProfileInput) {
     const [profile] = await this._db.insert(profiles).values(data).returning()
-    if (!profile) throw new Error('Failed to create profile')
+    if (!profile) throw createError(500, 'Failed to create profile')
     return profile
   }
 
@@ -30,7 +31,7 @@ export class DrizzleProfileRepository implements IProfileRepository {
       .set(data)
       .where(eq(profiles.userId, userId))
       .returning()
-    if (!profile) throw new Error('Profile not found')
+    if (!profile) throw createError(404, 'Profile not found')
     return profile
   }
 }

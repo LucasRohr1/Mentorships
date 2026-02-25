@@ -1,4 +1,5 @@
 import { eq } from 'drizzle-orm'
+import createError from 'http-errors'
 import type { IUserRepository, CreateUserInput, UpdateUserInput } from './user.repository.interface.js'
 import { db } from '../connection.js'
 import { users } from '../schema.js'
@@ -22,7 +23,7 @@ export class DrizzleUserRepository implements IUserRepository {
 
   async create(data: CreateUserInput) {
     const [user] = await this._db.insert(users).values(data).returning()
-    if (!user) throw new Error('Failed to create user')
+    if (!user) throw createError(500, 'Failed to create user')
     return user
   }
 
@@ -32,7 +33,7 @@ export class DrizzleUserRepository implements IUserRepository {
       .set(data)
       .where(eq(users.id, id))
       .returning()
-    if (!user) throw new Error('User not found')
+    if (!user) throw createError(404, 'User not found')
     return user
   }
 }

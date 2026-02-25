@@ -12,6 +12,7 @@ export interface UpdateMeInput {
   lastName?: string
   email?: string
   password?: string
+  currentPassword?: string
   bio?: string
   linkedinUrl?: string | null
   avatarUrl?: string | null
@@ -36,7 +37,9 @@ export class UserService {
   }
 
   async updateMe(userId: string, input: UpdateMeInput): Promise<UserWithProfile> {
+    if (input.password) await this.assertCurrentPasswordValid(userId, input.currentPassword!)
     if (input.email !== undefined) await this.assertEmailAvailableForUpdate(input.email, userId)
+    
     const userData = await this.extractUserData(input)
     const profileData = this.extractProfileData(input)
 
@@ -46,6 +49,13 @@ export class UserService {
     })
 
     return this.getMe(userId)
+  }
+
+  private async assertCurrentPasswordValid(userId: string, currentPassword: string): Promise<void> {
+    const user = await this.userRepo.findById(userId)
+    if (!user) throw createError(404, 'User not found')
+    const matches = await bcrypt.compare(currentPassword, user.passwordHash)
+    if (!matches) throw createError(400, 'Current password is incorrect')
   }
 
   private async assertEmailAvailableForUpdate(email: string, userId: string): Promise<void> {
