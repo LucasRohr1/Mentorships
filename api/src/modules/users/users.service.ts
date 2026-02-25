@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt'
 import createError from 'http-errors'
 import type { IProfileRepository } from '../../db/repositories/profile.repository.interface.js'
+import type { IUnitOfWork } from '../../db/repositories/unit-of-work.interface.js'
 import type { IUserRepository } from '../../db/repositories/user.repository.interface.js'
 import type { Profile, User } from '../../db/schema.js'
 import { env } from '../../env.js'
@@ -23,7 +24,8 @@ export interface UserWithProfile extends Omit<User, 'passwordHash'> {
 export class UserService {
   constructor(
     private readonly userRepo: IUserRepository,
-    private readonly profileRepo: IProfileRepository
+    private readonly profileRepo: IProfileRepository,
+    private readonly unitOfWork: IUnitOfWork
   ) {}
 
   async getMe(userId: string): Promise<UserWithProfile> {
@@ -38,8 +40,10 @@ export class UserService {
     const userData = await this.extractUserData(input)
     const profileData = this.extractProfileData(input)
 
-    if (Object.keys(userData).length > 0) await this.userRepo.update(userId, userData)
-    if (Object.keys(profileData).length > 0) await this.profileRepo.update(userId, profileData)
+    await this.unitOfWork.runInTransaction(async ({ users, profiles }) => {
+      if (Object.keys(userData).length > 0) await users.update(userId, userData)
+      if (Object.keys(profileData).length > 0) await profiles.update(userId, profileData)
+    })
 
     return this.getMe(userId)
   }
